@@ -40,22 +40,22 @@ int main(int argc, char **argv) {
 	char buf[256];
 	fgets(buf, 256, stdin);
 	buf[255] = '\0';
+	for (char *ptr = buf; *ptr; ptr++) {
+		if (*ptr == '\n') {
+			*ptr = '\0';
+			break;
+		}
+	}
+	struct command com = parse_command(buf);
 
 	char *paths = argv[1];
-	for (char *p = strtok(paths, ":"); p != NULL; p = strtok(NULL, ":")) {
-		DIR *d = opendir(p);
-		for (struct dirent *de = readdir(d); de != NULL; de = readdir(d)) {
-			
-		}
-		readdir(d);
-	}
 
 	int pid = fork();
 	if (pid == -1) {
 		perror("no fork");
 		exit(1);
 	} else if (pid == 0) {
-
+		
 		execv("", NULL);
 	} else {
 		int status;
