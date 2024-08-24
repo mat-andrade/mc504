@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 
 	for (char *path = strtok(paths, ":"); path != NULL; path = strtok(NULL, ":")) {
 
-		char p[256];
+		char p[512];
 		strcpy(p, path);
 		int l = strlen(p);
 		p[l] = '/';
@@ -74,4 +74,5 @@ int main(int argc, char **argv) {
 			execv(p, com.argv);
 		}
 	}
+	fprintf(stderr, "Program '%s' not found\n", com.program);
 }
