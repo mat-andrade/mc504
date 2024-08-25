@@ -47,10 +47,21 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "No path received\n");
 		exit(1);
 	}
-	printf("simpleshell$ ");
 
 	char buf[256];
-	fgets(buf, 256, stdin);
+	do {
+		printf("simpleshell$ ");
+		char *p = fgets(buf, 256, stdin);
+		if (feof(stdin)) {
+			printf("\n");
+			exit(0);
+		}
+		if (!p) {
+			perror("Error on reading input");
+			exit(1);
+		}
+	} while(buf[0] == '\n' || buf[0] == '\0');
+	
 	buf[255] = '\0';
 	for (char *ptr = buf; *ptr; ptr++) {
 		if (*ptr == '\n') {
@@ -63,13 +74,13 @@ int main(int argc, char **argv) {
 	char *paths = argv[1];
 
 	for (char *path = strtok(paths, ":"); path != NULL; path = strtok(NULL, ":")) {
-
 		char p[512];
-		strcpy(p, path);
+		strncpy(p, path, 255);
 		int l = strlen(p);
 		p[l] = '/';
 		p[l + 1] = '\0';
-		strcat(p, com.program);
+		strncat(p, com.program, 255);
+		p[511] = '\0';
 		if (access(p, F_OK) == 0) {
 			execv(p, com.argv);
 		}
