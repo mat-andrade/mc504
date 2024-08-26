@@ -23,7 +23,23 @@ struct command {
 	bool background;
 };
 
+struct path {
+	char **p;
+	size_t size;
+};
 
+struct path parse_path(char *path) {
+	size_t cap = 8, size = 0;
+	char **ret = malloc(cap * sizeof(char *));
+	for (char *p = strtok(path, ":"); p != NULL; p = strtok(NULL, ":")) {
+		if (size == cap) {
+			cap *= 2;
+			ret = realloc(ret, cap * sizeof(char *));
+		}
+		ret[size++] = p;
+	}
+	return (struct path){ret, size};
+}
 
 struct command parse_command(char *str) {
 	char *program = strtok(str, " ");
@@ -56,13 +72,15 @@ struct command parse_command(char *str) {
 	};
 }
 
-bool search_path(char *path, struct command com, char *out) {
-	for (path = strtok(path, ":"); path != NULL; path = strtok(NULL, ":")) {
-		strncpy(out, path, 255);
+bool search_path(struct path path, struct command com, char *out) {
+	for (int i = 0; i < path.size; i++) {
+		char *p = path.p[i];
+		strncpy(out, p, 255);
 		int l = strlen(out);
 		out[l] = '/';
 		out[l + 1] = '\0';
 		strncat(out, com.program, 255);
+		out[511] = '\0';
 		if (access(out, F_OK) == 0) {
 			return true;
 		}
@@ -76,6 +94,12 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "No path received\n");
 		exit(1);
 	}
+
+	struct path path = parse_path(argv[1]);
+	for (int i = 0; i < path.size; i++) {
+		printf("%s:", path.p[i]);
+	}
+	printf("\n");
 
 	for (;;) {
 		char buf[256];
@@ -105,7 +129,7 @@ int main(int argc, char **argv) {
 		}
 
 		char p[512];
-		if (search_path(argv[1], com, p)) {
+		if (search_path(path, com, p)) {
 			int pid = fork();
 			if (pid < 0 ) {
 				perror("Could not start process");
