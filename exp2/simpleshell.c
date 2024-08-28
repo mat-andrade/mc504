@@ -53,14 +53,12 @@ struct command parse_command(char *str) {
 		}
 		argv[argc++] = str;
 	}
-	bool background;
+	bool background = false;
 	if (strcmp(argv[argc - 1], "&") == 0) {
 		argc--;
-		puts("1");
 		background = true;
 	} else if (argc == cap){
 		argv = realloc(argv, (cap + 1) * sizeof(char *));
-		puts("2");
 		background = false;
 	}
 	argv[argc] = NULL;
@@ -96,10 +94,6 @@ int main(int argc, char **argv) {
 	}
 
 	struct path path = parse_path(argv[1]);
-	for (int i = 0; i < path.size; i++) {
-		printf("%s:", path.p[i]);
-	}
-	printf("\n");
 
 	for (;;) {
 		char buf[256];
@@ -134,10 +128,9 @@ int main(int argc, char **argv) {
 			if (pid < 0 ) {
 				perror("Could not start process");
 			} else if (pid > 0) {
-				int status;
+				int status = 0;
 				if (!com.background) {
-					puts("olá");
-					waitpid(-1, &status, 0);
+					waitpid(pid, &status, 0);
 				}
 			} else {
 				com.argv[0] = p;
@@ -147,5 +140,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Program '%s' not found\n", com.program);
 		}
 		free(com.argv);
+		waitpid(-1, NULL, WNOHANG);
 	}
 }
