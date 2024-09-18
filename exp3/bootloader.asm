@@ -7,13 +7,10 @@ _start:
     mov cx, si
     mov dx, si
     mov sp, 0x7C00 ; Utilizando o espaço antes do programa como pilha
-    mov bx, message
-    push bx
     call print
     jmp $ ; Mantem o programa nesse ponto depois de printar tudo na tela
 
 print:
-    pop bx
     mov si, 0
 .loop:
     mov ah, 0x0E
@@ -25,7 +22,7 @@ print:
     ret
 
 message:
-    db `Hello, Boot!\r\n`, 0
+    db `Hello, Boot!`, 0
 
 times 510 - ($ - $$) db 0
 dw 0xAA55 ; Carregar esse valor informa a BIOS que se trata de um bootloader
